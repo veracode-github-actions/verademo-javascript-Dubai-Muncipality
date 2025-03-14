@@ -31,13 +31,19 @@ jobs:
       #     name: VeracodeScanResults
       #     path: verascan
 
-      - name: Veracode Static Scan
-        uses: veracode/veracode-uploadandscan-action@v1
+      - name: Veracode Upload And Scan
+        uses: veracode/veracode-uploadandscan-action@0.2.7
         with:
-          appname: "Recent-1"  # Change to your Veracode App Profile
-          version: "${{ github.run_number }}"
-          filepath: "./verascan"
-          vid: ${{ secrets.VERACODE_API_ID }}
-          vkey: ${{ secrets.VERACODE_API_KEY }}
-          importResults: true
-          maximumWaitTime: 360
+            appname: 'Recent'
+            createprofile: false
+            filepath: './verascan'
+            version: ${{ github.run_id }}
+            vid: '${{ secrets.VID }}'
+            vkey: '${{ secrets.VKEY }}'
+            # createsandbox: 'false'
+            # sandboxname: 'SANDBOXNAME'
+            scantimeout: 120
+            # exclude: '*.js'
+            # include: '*.war'
+            criticality: 'VeryHigh'
+            deleteincompletescan: 0
