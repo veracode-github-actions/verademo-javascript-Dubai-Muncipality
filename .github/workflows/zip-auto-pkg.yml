@@ -1,10 +1,10 @@
-# name: Veracode Auto-Packaging and Scan
+name: Veracode Zip Source and Scan
 
-# on:
-#   push:
-#     branches:
-#       - main  # Change branch if needed
-#   pull_request:
+on:
+  push:
+    branches:
+      - main  # Change branch if needed
+  pull_request:
 
 jobs:
   veracode-scan:
@@ -14,29 +14,30 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Veracode CLI and Package Scan
+      - name: Zip Source Code
         run: |
-          curl -fsS https://tools.veracode.com/veracode-cli/install | sh
-          ./veracode package -das ${{ github.workspace }} --output ./verascan
+          zip -r source_code.zip . -x ".git/*" ".github/*"
 
-          # Check if the verascan directory exists
-          if [ ! -d "verascan" ]; then
-            echo "Error: verascan directory not found."
+      - name: Verify ZIP File
+        run: |
+          if [ ! -f "source_code.zip" ]; then
+            echo "Error: ZIP file was not created!"
             exit 1
           fi
+          ls -lh source_code.zip
 
-      # - name: Upload Verascan Artifact (Optional)
+      # - name: Upload Source Code Artifact (Optional)
       #   uses: actions/upload-artifact@v3
       #   with:
-      #     name: VeracodeScanResults
-      #     path: verascan
+      #     name: SourceCodeZip
+      #     path: source_code.zip
 
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.7
         with:
             appname: 'Recent'
             createprofile: false
-            filepath: './verascan'
+            filepath: 'source_code.zip'
             version: ${{ github.run_id }}
             vid: '${{ secrets.VID }}'
             vkey: '${{ secrets.VKEY }}'
