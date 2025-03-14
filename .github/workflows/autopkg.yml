@@ -1,0 +1,43 @@
+name: Veracode Auto-Packaging and Scan
+
+on:
+  push:
+    branches:
+      - main  # Change branch if needed
+  pull_request:
+
+jobs:
+  veracode-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Veracode CLI and Package Scan
+        run: |
+          curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+          ./veracode package -das ${{ github.workspace }} --output ./verascan
+
+          # Check if the verascan directory exists
+          if [ ! -d "verascan" ]; then
+            echo "Error: verascan directory not found."
+            exit 1
+          fi
+
+      # - name: Upload Verascan Artifact (Optional)
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: VeracodeScanResults
+      #     path: verascan
+
+      - name: Veracode Static Scan
+        uses: veracode/veracode-uploadandscan-action@v1
+        with:
+          appname: "Recent-1"  # Change to your Veracode App Profile
+          version: "${{ github.run_number }}"
+          filepath: "./verascan"
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          importResults: true
+          maximumWaitTime: 360

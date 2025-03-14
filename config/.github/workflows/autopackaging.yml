@@ -1,0 +1,51 @@
+name: Veracode_Upload_scan
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  veracode-sca-task:
+    runs-on: ubuntu-latest
+    name: Veracode_Upload_scan_DH
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Download and Install Veracode CLI
+      run: |
+        curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+        echo "Veracode CLI Installed Successfully"
+
+    - name: Package Source Code Using Veracode CLI
+      run: |
+        ./veracode package -das . --output ./verascan
+
+        # Check if the verascan directory exists
+        if [ ! -d "verascan" ]; then
+          echo "Error: verascan directory not found."
+          exit 1
+        fi
+        echo "Veracode Packaging Completed"
+
+    # - name: Upload and Scan Using Veracode CLI
+    #   run: |
+    #     ./veracode scan --appname "Recent" --filepath "./verascan" --version "${{ github.run_id }}" \
+    #     --vid "${{ secrets.VID }}" --vkey "${{ secrets.VKEY }}" --scantimeout 120 --exclude '*.js' --include '*.war'
+
+    - name: Veracode Upload And Scan
+      uses: veracode/veracode-uploadandscan-action@0.2.7
+      with:
+          appname: 'Recent'
+          createprofile: false
+          filepath: './verascan'
+          version: ${{ github.run_id }}
+          vid: '${{ secrets.VID }}'
+          vkey: '${{ secrets.VKEY }}'
+          # createsandbox: 'false'
+          # sandboxname: 'SANDBOXNAME'
+          scantimeout: 120
+          # exclude: '*.js'
+          # include: '*.war'
+          criticality: 'VeryHigh'
+          deleteincompletescan: 0

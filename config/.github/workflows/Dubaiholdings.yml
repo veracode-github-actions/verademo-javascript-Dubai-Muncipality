@@ -1,0 +1,38 @@
+# name: Veracode_Upload_scan
+# on:
+#   push:
+#     branches: [ main ]
+
+jobs:
+  veracode-sca-task:
+    runs-on: ubuntu-latest
+    name: Veracode_Upload_scan_DH
+
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v3
+
+    - name: Build war file
+      run: mvn clean package --file app/pom.xml
+
+    - name: List contents of project directory
+      run: find . -name "*.war"
+    
+    - name: Print current working directory
+      run: ls -R
+
+    - name: Veracode Upload And Scan
+      uses: veracode/veracode-uploadandscan-action@0.2.7
+      with:
+          appname: 'Recent'
+          createprofile: false
+          filepath: 'app/target/verademo.war'
+          version: ${{ github.run_id }}
+          vid: '${{ secrets.VID }}'
+          vkey: '${{ secrets.VKEY }}'
+          createsandbox: 'false'
+          # sandboxname: 'SANDBOXNAME'
+          scantimeout: 120
+          exclude: '*.js'
+          include: '*.war'
+          criticality: 'VeryHigh'
