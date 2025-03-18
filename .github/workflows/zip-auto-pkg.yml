@@ -47,4 +47,6 @@ jobs:
             # exclude: '*.js'
             # include: '*.war'
             criticality: 'VeryHigh'
+            toplevel : 'True'
+            includenewmodules : 'True'
             deleteincompletescan: 0
