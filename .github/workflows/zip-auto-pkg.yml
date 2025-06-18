@@ -1,14 +1,14 @@
-name: Veracode Zip Source and Scan
+# name: Veracode Zip Source and Scan
 
-on:
-  push:
-    branches:
-      - main  # Change branch if needed
-  pull_request:
+# on:
+#   push:
+#     branches:
+#       - main  # Change branch if needed
+#   pull_request:
 
-jobs:
-  veracode-scan:
-    runs-on: ubuntu-latest
+# jobs:
+#   veracode-scan:
+#     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
