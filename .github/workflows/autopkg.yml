@@ -42,7 +42,7 @@ jobs:
             vkey: '${{ secrets.VKEY }}'
             # createsandbox: 'false'
             # sandboxname: 'SANDBOXNAME'
-            scantimeout: 120
+            # scantimeout: 120
             # exclude: '*.js'
             # include: '*.war'
             criticality: 'VeryHigh'
