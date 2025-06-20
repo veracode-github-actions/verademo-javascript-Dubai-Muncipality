@@ -1,10 +1,10 @@
 name: Veracode Auto-Packaging and Scan
 
-on:
-  push:
-    branches:
-      - main  # Change branch if needed
-  pull_request:
+# on:
+#   push:
+#     branches:
+#       - main  # Change branch if needed
+#   pull_request:
 
 jobs:
   veracode-scan:

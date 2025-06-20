@@ -1,0 +1,63 @@
+#This pipeline will build the java application and scan the war file
+# List of war files command is added to verify the war file is available
+#exact path of the file should be mentioned to complete the scan 
+# In the final step results.json will be uploaded in the sarif format in the Github issues
+
+name: Veracode_pipeline_scan
+on:
+  push:
+    branches: [ main ]
+
+# This permission will give access for the sarif step
+permissions: 
+    security-events: write
+
+jobs:
+  veracode-sca-task:
+    runs-on: ubuntu-latest
+    name: pipeline
+
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Veracode CLI and Package Scan
+        run: |
+          curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+          ./veracode package -das ${{ github.workspace }} --output ./verascan
+
+          # Check if the verascan directory exists
+          if [ ! -d "verascan" ]; then
+            echo "Error: verascan directory not found."
+            exit 1
+          fi
+      
+
+      # run the pipeline scan action
+      - name: pipeline-scan action step
+        id: pipeline-scan
+        uses: veracode/Veracode-pipeline-scan-action@v1.0.12
+        with:
+          vid: ${{ secrets.VID }}
+          vkey: ${{ secrets.VKEY }}
+          file: './verascan'
+          json_output_file: results.json
+
+
+      # Convert the results to sarif format and upload it in the code scanning alerts 
+
+
+      # - name: Convert pipeline scan output to SARIF format
+      #   id: convert
+      #   uses: Veracode/veracode-pipeline-scan-results-to-sarif@v1.0.7
+      #   with:
+      #     pipeline-results-json: results.json
+      #     output-results-sarif: veracode-results.sarif
+      #     source-base-path-1: "^com/veracode:src/main/java/com/veracode"
+      #     source-base-path-2: "^WEB-INF:src/main/webapp/WEB-INF"
+
+      # - name: upload sarif file to repository
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with: # Path to SARIF file relative to the root of the repository
+      #     sarif_file: veracode-results.sarif
