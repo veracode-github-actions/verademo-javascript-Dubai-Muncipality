@@ -3,10 +3,10 @@
 #exact path of the file should be mentioned to complete the scan 
 # In the final step results.json will be uploaded in the sarif format in the Github issues
 
-name: Veracode_pipeline_scan
-on:
-  push:
-    branches: [ main ]
+# name: Veracode_pipeline_scan
+# on:
+#   push:
+#     branches: [ main ]
 
 # This permission will give access for the sarif step
 permissions: 

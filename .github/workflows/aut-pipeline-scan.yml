@@ -1,0 +1,47 @@
+name: Veracode Auto-Packaging and Pipeline Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  veracode-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Veracode CLI and Package Application
+        run: |
+          curl -fsS https://tools.veracode.com/veracode-cli/install | sh
+          ./veracode package -vas . --output verascan
+
+      - name: Upload Packaged ZIP Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: veracode-packaged-zips
+          path: verascan/*.zip
+
+      - name: Run Veracode Pipeline Scan
+        env:
+          VERACODE_API_KEY_ID: ${{ secrets.VID }}
+          VERACODE_API_KEY_SECRET: ${{ secrets.VKEY }}
+        run: |
+          ./veracode policy get "Al-Test" --format json
+
+          for file in verascan/*; do
+            if [ -f "$file" ]; then
+              echo "Checking contents of: $file"
+
+              # Skip if the ZIP has no real files (only folders or empty)
+              if [ "$(unzip -l "$file" | awk 'NR>3 {print $4}' | grep -v '/$' | wc -l)" -eq 0 ]; then
+                echo "Skipping $file — no valid files inside"
+                continue
+              fi
+
+              echo "Scanning $file ..."
+              ./veracode static scan "$file" --policy-file Al-Test.json
+            fi
+          done
